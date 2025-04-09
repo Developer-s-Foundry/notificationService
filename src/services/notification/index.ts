@@ -4,7 +4,8 @@ import { EventEmitter } from 'events';
 import db from '../../database';
 import { NotificationPayload, NotificationStatus, NotificationType } from '../../models/notification.model';
 import EmailService from './email.service';
-import SmsService from './sms.service';
+import SmsService from './sms.service'; // Termii service
+import { ISmsService } from '../../interfaces/ISmsService.ts'; // Import interface
 import PushService from './push.service';
 import InAppService from './in-app.service';
 
@@ -13,16 +14,16 @@ class NotificationService extends EventEmitter {
   private channel: amqp.Channel | null = null;
   private readonly queueName = 'notifications';
   private emailService: EmailService;
-  private smsService: SmsService;
+  private smsService: ISmsService;  // Change type to ISmsService for flexibility
   private pushService: PushService;
   private inAppService: InAppService;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
 
-  constructor() {
+  constructor(smsService: ISmsService = new SmsService()) {  // Allow injecting the smsService
     super();
     this.emailService = new EmailService();
-    this.smsService = new SmsService();
+    this.smsService = smsService; // Use the passed service or default to Termii
     this.pushService = new PushService();
     this.inAppService = new InAppService();
   }
@@ -104,18 +105,19 @@ class NotificationService extends EventEmitter {
       throw new Error('Channel not available');
     }
 
-    this.channel.consume(this.queueName, async (msg) => {
+    this.channel.consume(this.queueName, async (msg: amqp.Message | null) => {
       if (!msg) return;
 
       try {
         const content = JSON.parse(msg.content.toString());
         await this.processNotification(content);
         this.channel?.ack(msg);
+        console.log('[RabbitMQ Received Message]', msg.content.toString());
       } catch (error) {
         console.error('Error processing message:', error);
         this.channel?.nack(msg, false, !msg.fields.redelivered);
       }
-    }, { noAck: false });
+    });
   }
 
   async queueNotification(payload: NotificationPayload): Promise<void> {
@@ -156,7 +158,6 @@ class NotificationService extends EventEmitter {
     }
   }
 
-
   private async processNotification(notification: NotificationPayload & { id?: number }): Promise<void> {
     try {
       console.log(`Processing notification: ${notification.id}`);
@@ -166,6 +167,8 @@ class NotificationService extends EventEmitter {
           await this.emailService.send(notification);
           break;
         case NotificationType.SMS:
+          await this.smsService.send(notification);
+          console.log('Attempting to send SMS:', notification);
           await this.smsService.send(notification);
           break;
         case NotificationType.PUSH:
@@ -186,6 +189,7 @@ class NotificationService extends EventEmitter {
       }
 
       this.emit('notification:sent', notification);
+      
     } catch (error) {
       console.error(`Failed to process notification ${notification.id}:`, error);
 

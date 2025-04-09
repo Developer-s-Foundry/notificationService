@@ -2,11 +2,11 @@
   "name": "notification-service",
   "version": "1.0.0",
   "description": "This is a notification service",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node dist/index.js ",
-    "dev": "tsc --watch & nodemon dist/index.js",
+    "dev": "npx nodemon --exec ts-node src/index.ts",
     "migrate": "db-migrate --migrations-dir ./migrations",
     "migrate:create": "db-migrate create --config database.json -e dev",
     "migrate:up": "db-migrate up --config database.json -e dev",
@@ -16,7 +16,9 @@
   "license": "ISC",
   "devDependencies": {
     "@types/amqplib": "^0.10.7",
+    "@types/twilio": "^3.19.2",
     "db-migrate-pg": "^1.5.2",
+    "nodemon": "^3.1.9",
     "typescript": "^5.8.3"
   },
   "dependencies": {
@@ -26,10 +28,11 @@
     "@types/nodemon": "^3.1.1",
     "@types/pg": "^8.11.11",
     "amqplib": "^0.10.7",
+    "axios": "^1.8.4",
     "db-migrate": "^0.11.14",
     "express": "^5.1.0",
     "nodemailer": "^6.10.0",
-    "nodemon": "^3.1.9",
-    "pg": "^8.14.1"
+    "pg": "^8.14.1",
+    "twilio": "^5.5.2"
   }
 }
