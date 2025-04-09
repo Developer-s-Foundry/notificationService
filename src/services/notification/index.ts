@@ -4,8 +4,8 @@ import { EventEmitter } from 'events';
 import db from '../../database';
 import { NotificationPayload, NotificationStatus, NotificationType } from '../../models/notification.model';
 import EmailService from './email.service';
-import SmsService from './sms.service'; // Termii service
-import { ISmsService } from '../../interfaces/ISmsService.ts'; // Import interface
+import SmsService from './sms.service'; 
+import { ISmsService } from '../../interfaces/ISmsService.ts'; 
 import PushService from './push.service';
 import InAppService from './in-app.service';
 
