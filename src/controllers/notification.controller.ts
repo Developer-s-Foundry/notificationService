@@ -53,7 +53,7 @@ export const sendSmsNotification: RequestHandler = async (req, res) => {
 
 export const sendPushNotification: RequestHandler = async (req, res) => {
   try {
-    const { recipient, content, metadata } = req.body;
+    const { recipient, content, metadata, subject } = req.body;
     
     if (!recipient || !content) {
       res.status(400).json({ error: 'Missing required fields' });
@@ -63,6 +63,7 @@ export const sendPushNotification: RequestHandler = async (req, res) => {
     await notificationService.queueNotification({
       type: NotificationType.PUSH,
       recipient,
+      subject: subject || 'New Notification',
       content,
       metadata
     });
@@ -76,16 +77,17 @@ export const sendPushNotification: RequestHandler = async (req, res) => {
 
 export const createInAppNotification: RequestHandler = async (req, res) => {
   try {
-    const { recipient, content, metadata } = req.body;
+    //const userId = req.user?.userId; 
+    const { userId, content, metadata } = req.body;
     
-    if (!recipient || !content) {
+    if (!userId || !content) {
       res.status(400).json({ error: 'Missing required fields' });
       return;
     }
     
     await notificationService.queueNotification({
       type: NotificationType.IN_APP,
-      recipient,
+      recipient: userId,
       content,
       metadata
     });
@@ -138,3 +140,5 @@ export const markInAppNotificationAsRead: RequestHandler = async (req, res) => {
     res.status(500).json({ error: 'Failed to update notification' });
   }
 };
+
+

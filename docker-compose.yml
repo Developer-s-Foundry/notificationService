@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  notification-service:
+    build: .
+    container_name: notification-service
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:14
+    container_name: notification-db
+    environment:
+      POSTGRES_USER: notification_user
+      POSTGRES_PASSWORD: notification_pass
+      POSTGRES_DB: notification_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  pgdata:

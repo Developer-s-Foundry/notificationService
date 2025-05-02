@@ -14,7 +14,7 @@ class NotificationService extends EventEmitter {
   private channel: amqp.Channel | null = null;
   private readonly queueName = 'notifications';
   private emailService: EmailService;
-  private smsService: ISmsService;  // Change type to ISmsService for flexibility
+  private smsService: ISmsService;  
   private pushService: PushService;
   private inAppService: InAppService;
   private reconnectAttempts = 0;

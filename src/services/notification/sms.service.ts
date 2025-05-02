@@ -1,58 +1,3 @@
-// src/services/notification/sms.service.ts
-
-// import axios from 'axios';
-// import { NotificationPayload } from '../../models/notification.model';
-// import { ISmsService } from '../../interfaces/ISmsService.ts';
-
-// class SmsService implements ISmsService {
-//   private apiKey: string;
-//   private sender: string;
-
-//   constructor() {
-//     this.apiKey = process.env.TERMII_API_KEY || '';
-//     this.sender = process.env.TERMII_SENDER_ID || 'devfoundry'; // fallback
-//     console.log('[Termii Config]', this.apiKey, this.sender);
-//     if (!this.apiKey) {
-//       throw new Error('TERMII_API_KEY is not set');
-//     }
-//   }
-
-//   async send(notification: NotificationPayload): Promise<void> {
-//     const { recipient, content } = notification;
-
-//     try {
-//         const response = await axios.post(
-//           'https://api.ng.termii.com/api/sms/send',
-//           {
-//             to: recipient,
-//             from: this.sender,
-//             sms: content,
-//             type: 'plain', 
-//             channel: 'dnd',
-//             api_key: this.apiKey,
-//           },        
-//           {
-//             headers: {
-//               'Content-Type': 'application/json',
-//             },
-//           }
-//         );
-//         console.log('SMS Payload:', {
-//           to: recipient,
-//           from: this.sender,
-//           sms: content,
-//           api_key: this.apiKey,
-//         });
-//         console.log('SMS Response:', response.data);
-        
-//     } catch (error: any) {
-//       console.error('[Termii SMS Error]', error?.response?.data || error.message);
-//       throw new Error('Failed to send SMS via Termii');
-//     }
-//   }
-// }
-
-
 import axios from 'axios';
 import twilio from 'twilio';
 import { NotificationPayload } from '../../models/notification.model';
@@ -79,7 +24,7 @@ class TermiiSmsService implements ISmsService {
       from: this.sender,
       sms: content,
       type: 'plain',
-      channel: 'dnd',
+      channel: 'generic',
       api_key: this.apiKey,
     };
 

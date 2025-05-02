@@ -1,35 +1,46 @@
-// src/services/notification/push.service.ts
+import webpush from 'web-push';
 import { NotificationPayload } from '../../models/notification.model';
+import pool from '../../database/index'; 
+
+// Set VAPID keys
+webpush.setVapidDetails(
+  process.env.VAPID_SUBJECT || 'mailto:emmyochogwu@gmail.com',
+  process.env.VAPID_PUBLIC_KEY!,
+  process.env.VAPID_PRIVATE_KEY!
+);
 
 class PushService {
-  // Using web push notifications as a free alternative
   async send(notification: NotificationPayload): Promise<void> {
-    // In a real implementation, you would:
-    // 1. Store subscription objects for browsers
-    // 2. Use web-push library to send notifications
-    
-    // For now, we'll just log the notification
-    console.log(`[PUSH] To: ${notification.recipient}, Message: ${notification.content}`);
-    
-    // TODO: Implement with web-push library
-    // This would require adding the web-push package:
-    // npm install web-push @types/web-push
-    
-    /*
-    import webpush from 'web-push';
-    
-    // Set up VAPID keys (would be in your .env)
-    webpush.setVapidDetails(
-      'mailto:your-email@example.com',
-      process.env.VAPID_PUBLIC_KEY,
-      process.env.VAPID_PRIVATE_KEY
-    );
-    
-    // Get subscription from database based on recipient
-    const subscription = { endpoint: '...', keys: { auth: '...', p256dh: '...' } };
-    
-    await webpush.sendNotification(subscription, notification.content);
-    */
+    try {
+      // Get all push subscriptions for the recipient
+      const { rows } = await pool.query(
+        'SELECT subscription FROM push_subscriptions WHERE user_id = $1',
+        [notification.recipient]
+      );
+
+      if (rows.length === 0) {
+        console.warn(`[PUSH] No subscriptions found for user: ${notification.recipient}`);
+        return;
+      }
+
+      // Send notification to each subscription
+      const payload = JSON.stringify({
+        title: notification.subject || 'New Notification',
+        body: notification.content,
+        metadata: notification.metadata,
+      });
+
+      for (const row of rows) {
+        try {
+          await webpush.sendNotification(row.subscription, payload);
+          console.log(`[PUSH] Notification sent to user ${notification.recipient}`);
+        } catch (err) {
+          console.error(`[PUSH] Failed to send notification to user ${notification.recipient}:`, err);
+        }
+      }
+    } catch (error) {
+      console.error('[PUSH] Error querying push subscriptions:', error);
+    }
   }
 }
 
