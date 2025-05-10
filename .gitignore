@@ -5,3 +5,4 @@ package-lock.json
 coverage
 .idea
 dist
+.envcc

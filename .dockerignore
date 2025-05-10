@@ -5,3 +5,4 @@ dist
 tests
 *.log
 *.tsbuildinfo
+.envcc

@@ -3,6 +3,7 @@ import express, { Request, Response} from 'express';
 import { RequestHandler } from 'express';
 import db from '../database';
 import * as notificationController from '../controllers/notification.controller';
+import { verifySignature } from '../middlewares/verifySignature.middleware';
 
 const router = express.Router();
 
@@ -19,7 +20,11 @@ router.post('/in-app', notificationController.createInAppNotification);
 router.get('/in-app/:userId', notificationController.getInAppNotifications);
 router.put('/in-app/:id/read', notificationController.markInAppNotificationAsRead);
 
-// 🔔 New route for saving push subscription
+// router.get('/in-app/:userId', verifySignature, notificationController.getInAppNotifications);
+// router.put('/in-app/:id/read', verifySignature, notificationController.markInAppNotificationAsRead);
+
+
+// Route for saving push subscription
 const savePushSubscription: RequestHandler = async (req, res) => {
     let { userId, subscription } = req.body;
   
@@ -53,7 +58,7 @@ const savePushSubscription: RequestHandler = async (req, res) => {
     }
 };
 
-  router.post('/push/subscribe', savePushSubscription);
+  router.post('/push/subscribe', verifySignature, savePushSubscription);
   
 
 export default router;

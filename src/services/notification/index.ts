@@ -1,4 +1,3 @@
-// src/services/notification/index.ts
 import * as amqp from 'amqplib/callback_api';
 import { EventEmitter } from 'events';
 import db from '../../database';

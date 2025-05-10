@@ -7,15 +7,24 @@ class EmailService {
 
   constructor() {
     this.transporter = nodemailer.createTransport({
-      service: process.env.EMAIL_SERVICE,
+      host: process.env.EMAIL_HOST,
+      port: parseInt(process.env.EMAIL_PORT || "2525"),
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD
+        pass: process.env.EMAIL_PASSWORD,
       },
-      tls: {
-        rejectUnauthorized: false // for development/testing
-      }
     });
+    
+    // this.transporter = nodemailer.createTransport({
+    //   service: process.env.EMAIL_SERVICE,
+    //   auth: {
+    //     user: process.env.EMAIL_USER,
+    //     pass: process.env.EMAIL_PASSWORD
+    //   },
+    //   tls: {
+    //     rejectUnauthorized: false // for development/testing
+    //   }
+    // });
   }
 
   async send(notification: NotificationPayload): Promise<void> {
